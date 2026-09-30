@@ -1,4 +1,4 @@
-# neuron-spectral-dns
+# Spectral DNS of the Taylor-Green vortex on AWS Neuron
 
 ![Taylor-Green vortex at 512^3 on eight Inferentia2 NeuronCores: vorticity isosurfaces coloured by speed, t = 0 to 10](docs/media/tgv512_re1600_neuron.gif)
 
