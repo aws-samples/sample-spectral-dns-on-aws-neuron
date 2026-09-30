@@ -11,8 +11,9 @@ Neuron devices (Inferentia2 and Trainium1) with kernels written in the Neuron Ke
 benchmark case, not a CFD solver: periodic box, no geometry, no boundaries, incompressible, single precision. What it
 shows is a complete scientific time-stepping loop on the chip: three-dimensional transforms as matmuls on the Tensor
 engine, the nonlinear term, projection and Runge-Kutta update on the Vector engine, the field split over NeuronCores
-with all-to-all collectives inside the kernel, a C driver on the Neuron runtime library, and exactness against fp64
-references. The platform rules the kernels obey, each with the measurement behind it, are in
+with all-to-all collectives inside the kernel, and a C driver on the Neuron runtime library. Everything on the device
+runs in fp32. Single-core runs match an fp64 NumPy oracle to 1e-6; multi-core runs up to 512^3 match a 32-rank
+Trainium1 reference. The platform rules the kernels obey, each with the measurement behind it, are in
 [docs/neuron-rules.md](docs/neuron-rules.md).
 
 This is sample code, for non-production usage. You should work with your security and legal teams to meet your
