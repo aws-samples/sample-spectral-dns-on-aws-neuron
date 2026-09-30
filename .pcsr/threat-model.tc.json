@@ -1,0 +1,856 @@
+{
+  "schema": 1,
+  "applicationInfo": {
+    "name": "neuron-spectral-dns",
+    "description": "Public AWS sample (MIT-0): a pseudo-spectral DNS of the Taylor-Green vortex on AWS Neuron (Inferentia2, Trainium1). It deploys no service. An engineer runs it on one ephemeral EC2 Neuron instance in their own account, by hand on a Neuron Deep Learning AMI or with scripts/launch_ec2.sh. No customer or regulated data is processed; the output is benchmark CSVs."
+  },
+  "architecture": {
+    "description": "See .pcsr/architecture.md and .pcsr/architecture.png. The engineer's workstation calls SSM Parameter Store and the EC2 API with least-privilege credentials (docs/launcher-policy.json). One Neuron instance runs in the default VPC public subnet with a dedicated security group (no ingress, egress TCP 443 only), IMDSv2 required, no key pair, an encrypted root volume and a TTL. Optional: Session Manager and S3 through the caller's instance profile."
+  },
+  "dataflow": {
+    "description": "See .pcsr/dataflow-diagram.png. 1 ssm:GetParameter (DLAMI id); 2 EC2 API calls (security group, RunInstances, iam:PassRole) with validated user data; 3 launch; 4 git fetch of a pinned ref, or a SHA-256-checked tarball, over HTTPS 443 through the internet gateway; 5 optional s3:PutObject of logs and CSVs; 6 optional Session Manager. The instance reads its optional role credentials from IMDSv2."
+  },
+  "assumptions": [
+    {
+      "id": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "numericId": 1,
+      "content": "The engineer runs the sample in a non-production AWS account with their own least-privilege credentials, as listed in docs/launcher-policy.json.",
+      "displayOrder": 1,
+      "metadata": []
+    },
+    {
+      "id": "b885c986-3a4c-5f64-9a5b-ebd7ace12720",
+      "numericId": 2,
+      "content": "The Neuron Deep Learning AMI and the Neuron SDK it carries (NKI, neuronx-cc, libnrt) are trusted AWS software.",
+      "displayOrder": 2,
+      "metadata": []
+    },
+    {
+      "id": "f3683ec9-e4fc-550b-8a52-e9b097d12db2",
+      "numericId": 3,
+      "content": "The engineer reviews the tag or commit they run; the default is the release tag of the public repository, served over HTTPS.",
+      "displayOrder": 3,
+      "metadata": []
+    },
+    {
+      "id": "bba20cd6-5ce7-5bbb-aff3-9088185d8c63",
+      "numericId": 4,
+      "content": "No customer or regulated data is processed; the input is an analytic field and the output is benchmark statistics.",
+      "displayOrder": 4,
+      "metadata": []
+    },
+    {
+      "id": "88cced84-1bd8-538c-b59e-d72af10e4395",
+      "numericId": 5,
+      "content": "Each run uses one ephemeral instance; hosting the solver as a multi-tenant service is out of scope.",
+      "displayOrder": 5,
+      "metadata": []
+    },
+    {
+      "id": "f84f84e2-d3c0-5250-a761-4616051a1792",
+      "numericId": 6,
+      "content": "The optional instance profile and S3 results bucket belong to the caller and are configured by the caller.",
+      "displayOrder": 6,
+      "metadata": []
+    }
+  ],
+  "mitigations": [
+    {
+      "id": "e40248f1-a067-561b-b697-60e71e930fda",
+      "numericId": 1,
+      "status": "mitigationResolved",
+      "content": "Dedicated security group \"neuron-spectral-dns\": no ingress rule, egress TCP 443 to 0.0.0.0/0 only. launch_ec2.sh creates it once per VPC and refuses any group, including one passed with -G, that has an ingress rule. The sample creates no key pair and nothing listens on the instance.",
+      "displayOrder": 1,
+      "metadata": []
+    },
+    {
+      "id": "59ac0037-3dd8-55f4-b337-752dc59b369b",
+      "numericId": 2,
+      "status": "mitigationResolved",
+      "content": "Interactive access only through Session Manager, tied to an IAM identity; no SSH, no open port.",
+      "displayOrder": 2,
+      "metadata": []
+    },
+    {
+      "id": "22bb07f4-a249-5885-a59e-47be212dea9c",
+      "numericId": 3,
+      "status": "mitigationResolved",
+      "content": "IMDSv2 required at launch (HttpTokens=required): the metadata endpoint needs a session token, and with no listener there is no request path to relay.",
+      "displayOrder": 3,
+      "metadata": []
+    },
+    {
+      "id": "a8bdba96-971c-5415-b76d-fcdf9bed6a34",
+      "numericId": 4,
+      "status": "mitigationResolved",
+      "content": "Least-privilege instance role: AmazonSSMManagedInstanceCore plus s3:PutObject on one prefix; no wildcard resource. Without a profile the instance has no AWS permission.",
+      "displayOrder": 4,
+      "metadata": []
+    },
+    {
+      "id": "809667f6-ecce-5840-9268-ebcd8b8818b6",
+      "numericId": 5,
+      "status": "mitigationResolved",
+      "content": "Pinned source: the git path fetches exactly one tag or commit (-c, default the release tag) with git fetch --depth 1 and git checkout FETCH_HEAD, and logs the resolved commit SHA. A tarball source is refused without its SHA-256 (-S).",
+      "displayOrder": 5,
+      "metadata": []
+    },
+    {
+      "id": "b602c140-0717-5e6d-9d5e-e543ba5287d9",
+      "numericId": 6,
+      "status": "mitigationResolved",
+      "content": "Automatic teardown: shutdown behaviour terminate plus shutdown -h +TTL in user data (TTL 1 to 1440 minutes, default 60).",
+      "displayOrder": 6,
+      "metadata": []
+    },
+    {
+      "id": "828c9c60-a0a9-5f92-8f8d-ae3a2c6af967",
+      "numericId": 7,
+      "status": "mitigationResolved",
+      "content": "Caller-controlled output destination: the run writes only when -u names a prefix, with the caller's own role; the sample creates no bucket and ships no bucket policy. NEFFs are not uploaded.",
+      "displayOrder": 7,
+      "metadata": []
+    },
+    {
+      "id": "c7fc28de-39a7-568d-b370-8f34c89beec3",
+      "numericId": 8,
+      "status": "mitigationResolved",
+      "content": "No secrets in the tree: account, region, profile and bucket are caller-supplied parameters; the tree is secret-scanned before publication.",
+      "displayOrder": 8,
+      "metadata": []
+    },
+    {
+      "id": "507b8f9f-9cde-5015-aa7c-e61f54b02419",
+      "numericId": 9,
+      "status": "mitigationResolved",
+      "content": "Encrypted, ephemeral storage: gp3 root volume encrypted with the account default EBS key and deleted on termination.",
+      "displayOrder": 9,
+      "metadata": []
+    },
+    {
+      "id": "eb01e5f8-85ed-5549-b834-69ff40ddc12a",
+      "numericId": 10,
+      "status": "mitigationResolved",
+      "content": "TLS for every transfer and a trusted image source: git fetch, S3 and all AWS API calls use HTTPS; the DLAMI id comes from the public AWS-owned SSM parameter, read with the caller's IAM credentials.",
+      "displayOrder": 10,
+      "metadata": []
+    },
+    {
+      "id": "8c8450f4-bd8f-524b-890c-ea48cdc9b0fa",
+      "numericId": 11,
+      "status": "mitigationResolved",
+      "content": "Trusted runtime and documented API surface: kernels run inside the Neuron runtime on a single-tenant instance the caller owns; the C drivers use the documented libnrt API, check mmap, fopen and allocation failures and exact input file sizes, bound integer arguments, and are built with -fstack-protector-strong -D_FORTIFY_SOURCE=2. Nothing is installed at run time: the Neuron SDK and NumPy come from the AMI.",
+      "displayOrder": 11,
+      "metadata": []
+    },
+    {
+      "id": "b2c1da87-cf59-5b97-aa51-afb71a5b5386",
+      "numericId": 12,
+      "status": "mitigationResolved",
+      "content": "Attributable access and account isolation: every Session Manager session and EC2 API call ties to an IAM principal in CloudTrail, in the engineer's own non-production account.",
+      "displayOrder": 12,
+      "metadata": []
+    },
+    {
+      "id": "bb72ff27-3dc3-50d3-9a4b-b82ad374addc",
+      "numericId": 13,
+      "status": "mitigationResolved",
+      "content": "Least-privilege launcher identity (docs/launcher-policy.json): ssm:GetParameter on the public Neuron DLAMI parameters only, the security-group actions, RunInstances, CreateTags only on create (ec2:CreateAction RunInstances or CreateSecurityGroup), and iam:PassRole on the one instance role with iam:PassedToService ec2.amazonaws.com.",
+      "displayOrder": 13,
+      "metadata": []
+    },
+    {
+      "id": "79fb0541-00a4-562d-a808-cdb22171e63a",
+      "numericId": 14,
+      "status": "mitigationResolved",
+      "content": "Launcher input validation: region, instance type, TTL, grid, ranks, source (https only, no shell metacharacters), ref, SHA-256, security group id, profile and S3 prefix (^s3://[a-z0-9.-]+(/[A-Za-z0-9._/-]*)?$) are checked against strict patterns before they reach the root user-data script; the script exits on any mismatch.",
+      "displayOrder": 14,
+      "metadata": []
+    },
+    {
+      "id": "58af4a21-e05b-52f7-a3b5-184b0a1f956c",
+      "numericId": 15,
+      "status": "mitigationResolved",
+      "content": "Checked tarball: the tarball path requires -S <sha256>, verified with sha256sum -c before tar --strip-components=1, and the run stops on a mismatch. A presigned URL is scoped to one object with a short expiry, because it is readable in user data by anyone with ec2:DescribeInstanceAttribute until it expires.",
+      "displayOrder": 15,
+      "metadata": []
+    }
+  ],
+  "assumptionLinks": [
+    {
+      "assumptionId": "88cced84-1bd8-538c-b59e-d72af10e4395",
+      "linkedId": "cd27127a-1472-543b-913b-4d4aabf084bb",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "f3683ec9-e4fc-550b-8a52-e9b097d12db2",
+      "linkedId": "390856b8-bccd-520b-9d89-c35a1a10d0b5",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "linkedId": "1186fcd3-bb6f-56ec-bc28-ae545be18710",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "88cced84-1bd8-538c-b59e-d72af10e4395",
+      "linkedId": "1186fcd3-bb6f-56ec-bc28-ae545be18710",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "linkedId": "1b2b63c1-8790-5450-924f-9fb2e9751f37",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "bba20cd6-5ce7-5bbb-aff3-9088185d8c63",
+      "linkedId": "1b2b63c1-8790-5450-924f-9fb2e9751f37",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "f84f84e2-d3c0-5250-a761-4616051a1792",
+      "linkedId": "1b2b63c1-8790-5450-924f-9fb2e9751f37",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "bba20cd6-5ce7-5bbb-aff3-9088185d8c63",
+      "linkedId": "d5eab2e5-1ea4-57f0-9397-bc99b2cc821d",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "b885c986-3a4c-5f64-9a5b-ebd7ace12720",
+      "linkedId": "7331f884-5540-5f76-a5c2-3b9603af2278",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "88cced84-1bd8-538c-b59e-d72af10e4395",
+      "linkedId": "7331f884-5540-5f76-a5c2-3b9603af2278",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "b885c986-3a4c-5f64-9a5b-ebd7ace12720",
+      "linkedId": "7ca0b822-281d-5186-bac3-a2805b5c5634",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "b885c986-3a4c-5f64-9a5b-ebd7ace12720",
+      "linkedId": "fc5669af-d1c9-5d84-adc1-a9a098665a00",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "f3683ec9-e4fc-550b-8a52-e9b097d12db2",
+      "linkedId": "fc5669af-d1c9-5d84-adc1-a9a098665a00",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "linkedId": "80e6248e-64a1-5a33-9376-17004d645041",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "linkedId": "09ace741-e8ea-52a4-a896-9915b2a15454",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "f3683ec9-e4fc-550b-8a52-e9b097d12db2",
+      "linkedId": "e0b5cd60-098c-5d76-a490-57319dcd0695",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "88cced84-1bd8-538c-b59e-d72af10e4395",
+      "linkedId": "5a282d00-a1b7-5051-b5b5-ec810d25b584",
+      "type": "Threat"
+    },
+    {
+      "assumptionId": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "linkedId": "bb72ff27-3dc3-50d3-9a4b-b82ad374addc",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "linkedId": "b2c1da87-cf59-5b97-aa51-afb71a5b5386",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "8ed496e0-cb13-5f2d-8f17-2223fc897b9e",
+      "linkedId": "59ac0037-3dd8-55f4-b337-752dc59b369b",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "b885c986-3a4c-5f64-9a5b-ebd7ace12720",
+      "linkedId": "8c8450f4-bd8f-524b-890c-ea48cdc9b0fa",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "f3683ec9-e4fc-550b-8a52-e9b097d12db2",
+      "linkedId": "809667f6-ecce-5840-9268-ebcd8b8818b6",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "f3683ec9-e4fc-550b-8a52-e9b097d12db2",
+      "linkedId": "eb01e5f8-85ed-5549-b834-69ff40ddc12a",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "bba20cd6-5ce7-5bbb-aff3-9088185d8c63",
+      "linkedId": "c7fc28de-39a7-568d-b370-8f34c89beec3",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "88cced84-1bd8-538c-b59e-d72af10e4395",
+      "linkedId": "e40248f1-a067-561b-b697-60e71e930fda",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "88cced84-1bd8-538c-b59e-d72af10e4395",
+      "linkedId": "b602c140-0717-5e6d-9d5e-e543ba5287d9",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "f84f84e2-d3c0-5250-a761-4616051a1792",
+      "linkedId": "a8bdba96-971c-5415-b76d-fcdf9bed6a34",
+      "type": "Mitigation"
+    },
+    {
+      "assumptionId": "f84f84e2-d3c0-5250-a761-4616051a1792",
+      "linkedId": "828c9c60-a0a9-5f92-8f8d-ae3a2c6af967",
+      "type": "Mitigation"
+    }
+  ],
+  "mitigationLinks": [
+    {
+      "linkedId": "cd27127a-1472-543b-913b-4d4aabf084bb",
+      "mitigationId": "e40248f1-a067-561b-b697-60e71e930fda"
+    },
+    {
+      "linkedId": "cd27127a-1472-543b-913b-4d4aabf084bb",
+      "mitigationId": "59ac0037-3dd8-55f4-b337-752dc59b369b"
+    },
+    {
+      "linkedId": "fabf0418-c346-5abc-bfb7-910590c2de20",
+      "mitigationId": "22bb07f4-a249-5885-a59e-47be212dea9c"
+    },
+    {
+      "linkedId": "fabf0418-c346-5abc-bfb7-910590c2de20",
+      "mitigationId": "a8bdba96-971c-5415-b76d-fcdf9bed6a34"
+    },
+    {
+      "linkedId": "fabf0418-c346-5abc-bfb7-910590c2de20",
+      "mitigationId": "e40248f1-a067-561b-b697-60e71e930fda"
+    },
+    {
+      "linkedId": "390856b8-bccd-520b-9d89-c35a1a10d0b5",
+      "mitigationId": "809667f6-ecce-5840-9268-ebcd8b8818b6"
+    },
+    {
+      "linkedId": "390856b8-bccd-520b-9d89-c35a1a10d0b5",
+      "mitigationId": "a8bdba96-971c-5415-b76d-fcdf9bed6a34"
+    },
+    {
+      "linkedId": "390856b8-bccd-520b-9d89-c35a1a10d0b5",
+      "mitigationId": "eb01e5f8-85ed-5549-b834-69ff40ddc12a"
+    },
+    {
+      "linkedId": "1186fcd3-bb6f-56ec-bc28-ae545be18710",
+      "mitigationId": "b602c140-0717-5e6d-9d5e-e543ba5287d9"
+    },
+    {
+      "linkedId": "1b2b63c1-8790-5450-924f-9fb2e9751f37",
+      "mitigationId": "828c9c60-a0a9-5f92-8f8d-ae3a2c6af967"
+    },
+    {
+      "linkedId": "1b2b63c1-8790-5450-924f-9fb2e9751f37",
+      "mitigationId": "a8bdba96-971c-5415-b76d-fcdf9bed6a34"
+    },
+    {
+      "linkedId": "1b2b63c1-8790-5450-924f-9fb2e9751f37",
+      "mitigationId": "507b8f9f-9cde-5015-aa7c-e61f54b02419"
+    },
+    {
+      "linkedId": "d5eab2e5-1ea4-57f0-9397-bc99b2cc821d",
+      "mitigationId": "c7fc28de-39a7-568d-b370-8f34c89beec3"
+    },
+    {
+      "linkedId": "7331f884-5540-5f76-a5c2-3b9603af2278",
+      "mitigationId": "8c8450f4-bd8f-524b-890c-ea48cdc9b0fa"
+    },
+    {
+      "linkedId": "7ca0b822-281d-5186-bac3-a2805b5c5634",
+      "mitigationId": "8c8450f4-bd8f-524b-890c-ea48cdc9b0fa"
+    },
+    {
+      "linkedId": "7ca0b822-281d-5186-bac3-a2805b5c5634",
+      "mitigationId": "809667f6-ecce-5840-9268-ebcd8b8818b6"
+    },
+    {
+      "linkedId": "fc5669af-d1c9-5d84-adc1-a9a098665a00",
+      "mitigationId": "eb01e5f8-85ed-5549-b834-69ff40ddc12a"
+    },
+    {
+      "linkedId": "80e6248e-64a1-5a33-9376-17004d645041",
+      "mitigationId": "b2c1da87-cf59-5b97-aa51-afb71a5b5386"
+    },
+    {
+      "linkedId": "80e6248e-64a1-5a33-9376-17004d645041",
+      "mitigationId": "59ac0037-3dd8-55f4-b337-752dc59b369b"
+    },
+    {
+      "linkedId": "09ace741-e8ea-52a4-a896-9915b2a15454",
+      "mitigationId": "bb72ff27-3dc3-50d3-9a4b-b82ad374addc"
+    },
+    {
+      "linkedId": "09ace741-e8ea-52a4-a896-9915b2a15454",
+      "mitigationId": "b2c1da87-cf59-5b97-aa51-afb71a5b5386"
+    },
+    {
+      "linkedId": "f2c86586-8030-5c1e-884c-6cdce0132bf6",
+      "mitigationId": "79fb0541-00a4-562d-a808-cdb22171e63a"
+    },
+    {
+      "linkedId": "e0b5cd60-098c-5d76-a490-57319dcd0695",
+      "mitigationId": "58af4a21-e05b-52f7-a3b5-184b0a1f956c"
+    },
+    {
+      "linkedId": "e0b5cd60-098c-5d76-a490-57319dcd0695",
+      "mitigationId": "79fb0541-00a4-562d-a808-cdb22171e63a"
+    },
+    {
+      "linkedId": "5a282d00-a1b7-5051-b5b5-ec810d25b584",
+      "mitigationId": "e40248f1-a067-561b-b697-60e71e930fda"
+    }
+  ],
+  "threats": [
+    {
+      "id": "cd27127a-1472-543b-913b-4d4aabf084bb",
+      "numericId": 1,
+      "threatSource": "internet actor",
+      "prerequisites": "who can reach the public IP address of the instance",
+      "threatAction": "open an inbound connection to the instance to reach a shell, the runtime or the code",
+      "threatImpact": "unauthorized use of the instance, its compute and the code it runs",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "An internet actor who can reach the public IP address of the instance can open an inbound connection to the instance to reach a shell, the runtime or the code, which leads to unauthorized use of the instance, its compute and the code it runs",
+      "displayOrder": 1,
+      "status": "threatResolved",
+      "tags": [
+        "network",
+        "Priority:Medium",
+        "STRIDE:Elevation of Privilege"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fabf0418-c346-5abc-bfb7-910590c2de20",
+      "numericId": 2,
+      "threatSource": "process on the instance",
+      "prerequisites": "with a foothold on the box while an instance profile is attached",
+      "threatAction": "read the role credentials from instance metadata",
+      "threatImpact": "use of the role's Session Manager and S3 permissions outside the run",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "A process on the instance with a foothold on the box while an instance profile is attached can read the role credentials from instance metadata, which leads to use of the role's Session Manager and S3 permissions outside the run",
+      "displayOrder": 2,
+      "status": "threatResolved",
+      "tags": [
+        "credentials",
+        "IMDS",
+        "Priority:High",
+        "STRIDE:Information Disclosure"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "High"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "390856b8-bccd-520b-9d89-c35a1a10d0b5",
+      "numericId": 3,
+      "threatSource": "actor who controls the source repository",
+      "prerequisites": "that the instance fetches at boot",
+      "threatAction": "serve tampered or unreviewed code for the instance to run as root",
+      "threatImpact": "arbitrary code execution on the instance with the permissions of its optional role",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "An actor who controls the source repository that the instance fetches at boot can serve tampered or unreviewed code for the instance to run as root, which leads to arbitrary code execution on the instance with the permissions of its optional role",
+      "displayOrder": 3,
+      "status": "threatResolved",
+      "tags": [
+        "supply-chain",
+        "code-integrity",
+        "Priority:High",
+        "STRIDE:Tampering"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "High"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1186fcd3-bb6f-56ec-bc28-ae545be18710",
+      "numericId": 4,
+      "threatSource": "operator",
+      "prerequisites": "who launches a costly instance type and forgets it",
+      "threatAction": "leave the instance running after the run ends",
+      "threatImpact": "runaway compute cost in the account",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "An operator who launches a costly instance type and forgets it can leave the instance running after the run ends, which leads to runaway compute cost in the account",
+      "displayOrder": 4,
+      "status": "threatResolved",
+      "tags": [
+        "cost",
+        "availability",
+        "Priority:Medium",
+        "STRIDE:Denial of Service"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1b2b63c1-8790-5450-924f-9fb2e9751f37",
+      "numericId": 5,
+      "threatSource": "operator",
+      "prerequisites": "who names an unintended or public bucket with -u",
+      "threatAction": "send the run output to that bucket",
+      "threatImpact": "disclosure of the run logs and CSVs to the wrong audience",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "An operator who names an unintended or public bucket with -u can send the run output to that bucket, which leads to disclosure of the run logs and CSVs to the wrong audience",
+      "displayOrder": 5,
+      "status": "threatResolved",
+      "tags": [
+        "s3",
+        "Priority:Low",
+        "STRIDE:Information Disclosure"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Low"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d5eab2e5-1ea4-57f0-9397-bc99b2cc821d",
+      "numericId": 6,
+      "threatSource": "contributor to the repository",
+      "prerequisites": "with account ids, bucket names, instance ids or tokens in the working tree",
+      "threatAction": "publish those identifiers with the public sample",
+      "threatImpact": "leaked identifiers or credentials that help an attack on the account",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "A contributor to the repository with account ids, bucket names, instance ids or tokens in the working tree can publish those identifiers with the public sample, which leads to leaked identifiers or credentials that help an attack on the account",
+      "displayOrder": 6,
+      "status": "threatResolved",
+      "tags": [
+        "secrets",
+        "Priority:High",
+        "STRIDE:Information Disclosure"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "High"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7331f884-5540-5f76-a5c2-3b9603af2278",
+      "numericId": 7,
+      "threatSource": "malicious or faulty Neuron kernel",
+      "prerequisites": "that is compiled and run inside the Neuron runtime",
+      "threatAction": "corrupt device state or reach memory outside its own allocation",
+      "threatImpact": "a device fault or an attempt to escape the instance",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "A malicious or faulty Neuron kernel that is compiled and run inside the Neuron runtime can corrupt device state or reach memory outside its own allocation, which leads to a device fault or an attempt to escape the instance",
+      "displayOrder": 7,
+      "status": "threatResolved",
+      "tags": [
+        "accelerator",
+        "Priority:Low",
+        "STRIDE:Elevation of Privilege"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Low"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7ca0b822-281d-5186-bac3-a2805b5c5634",
+      "numericId": 8,
+      "threatSource": "compromised upstream dependency",
+      "prerequisites": "that ships in the Neuron SDK or NumPy of the AMI",
+      "threatAction": "inject malicious code into the build or the run",
+      "threatImpact": "compromised kernels or drivers executing on the instance",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "A compromised upstream dependency that ships in the Neuron SDK or NumPy of the AMI can inject malicious code into the build or the run, which leads to compromised kernels or drivers executing on the instance",
+      "displayOrder": 8,
+      "status": "threatIdentified",
+      "tags": [
+        "supply-chain",
+        "Priority:Medium",
+        "STRIDE:Tampering"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fc5669af-d1c9-5d84-adc1-a9a098665a00",
+      "numericId": 9,
+      "threatSource": "network attacker",
+      "prerequisites": "who can tamper with DNS or TLS on the path to the repository host or the SSM endpoint",
+      "threatAction": "spoof the DLAMI id or the repository to serve a malicious image or source",
+      "threatImpact": "the instance booting a malicious AMI or running spoofed source",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "A network attacker who can tamper with DNS or TLS on the path to the repository host or the SSM endpoint can spoof the DLAMI id or the repository to serve a malicious image or source, which leads to the instance booting a malicious AMI or running spoofed source",
+      "displayOrder": 9,
+      "status": "threatResolved",
+      "tags": [
+        "spoofing",
+        "tls",
+        "Priority:Medium",
+        "STRIDE:Spoofing"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "80e6248e-64a1-5a33-9376-17004d645041",
+      "numericId": 10,
+      "threatSource": "operator",
+      "prerequisites": "with access to the instance through a shared or unlogged channel",
+      "threatAction": "perform actions on the instance that no principal can be held to account for",
+      "threatImpact": "no attribution of those actions during an investigation",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "An operator with access to the instance through a shared or unlogged channel can perform actions on the instance that no principal can be held to account for, which leads to no attribution of those actions during an investigation",
+      "displayOrder": 10,
+      "status": "threatResolved",
+      "tags": [
+        "audit",
+        "repudiation",
+        "Priority:Low",
+        "STRIDE:Repudiation"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Low"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "09ace741-e8ea-52a4-a896-9915b2a15454",
+      "numericId": 11,
+      "threatSource": "holder of the launcher credentials",
+      "prerequisites": "with broader EC2 and IAM permissions than the launch needs",
+      "threatAction": "pass a more privileged role to the instance, tag or change existing resources, or launch in an unintended place",
+      "threatImpact": "privilege escalation through the instance role or changes to resources outside the run",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "A holder of the launcher credentials with broader EC2 and IAM permissions than the launch needs can pass a more privileged role to the instance, tag or change existing resources, or launch in an unintended place, which leads to privilege escalation through the instance role or changes to resources outside the run",
+      "displayOrder": 11,
+      "status": "threatResolved",
+      "tags": [
+        "iam",
+        "launcher",
+        "Priority:Medium",
+        "STRIDE:Elevation of Privilege"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f2c86586-8030-5c1e-884c-6cdce0132bf6",
+      "numericId": 12,
+      "threatSource": "actor who controls a launcher argument",
+      "prerequisites": "that is copied into the user-data script run as root at boot",
+      "threatAction": "inject shell commands through the region, TTL, grid, source, ref, profile or S3 prefix",
+      "threatImpact": "arbitrary root command execution on the instance",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "An actor who controls a launcher argument that is copied into the user-data script run as root at boot can inject shell commands through the region, TTL, grid, source, ref, profile or S3 prefix, which leads to arbitrary root command execution on the instance",
+      "displayOrder": 12,
+      "status": "threatResolved",
+      "tags": [
+        "injection",
+        "user-data",
+        "Priority:Medium",
+        "STRIDE:Tampering"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e0b5cd60-098c-5d76-a490-57319dcd0695",
+      "numericId": 13,
+      "threatSource": "actor who can replace or read the source tarball",
+      "prerequisites": "that the tarball path fetches through a URL placed in user data",
+      "threatAction": "substitute a tampered tarball, or reuse a presigned URL read from user data",
+      "threatImpact": "tampered code running as root, or disclosure of the unpublished tree",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "An actor who can replace or read the source tarball that the tarball path fetches through a URL placed in user data can substitute a tampered tarball, or reuse a presigned URL read from user data, which leads to tampered code running as root, or disclosure of the unpublished tree",
+      "displayOrder": 13,
+      "status": "threatResolved",
+      "tags": [
+        "supply-chain",
+        "presigned-url",
+        "Priority:Medium",
+        "STRIDE:Tampering",
+        "STRIDE:Information Disclosure"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "T",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5a282d00-a1b7-5051-b5b5-ec810d25b584",
+      "numericId": 14,
+      "threatSource": "workload in the same VPC",
+      "prerequisites": "that shares a security group with the instance",
+      "threatAction": "connect to the instance through the group's member-to-member rule",
+      "threatImpact": "lateral movement onto the instance from another workload",
+      "impactedGoal": [],
+      "impactedAssets": [],
+      "statement": "A workload in the same VPC that shares a security group with the instance can connect to the instance through the group's member-to-member rule, which leads to lateral movement onto the instance from another workload",
+      "displayOrder": 14,
+      "status": "threatResolved",
+      "tags": [
+        "network",
+        "lateral-movement",
+        "Priority:Medium",
+        "STRIDE:Elevation of Privilege"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        },
+        {
+          "key": "STRIDE",
+          "value": [
+            "E"
+          ]
+        }
+      ]
+    }
+  ]
+}

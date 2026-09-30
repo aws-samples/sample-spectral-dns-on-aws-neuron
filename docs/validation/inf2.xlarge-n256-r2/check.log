@@ -1,0 +1,11 @@
+CHECK rows: PASS (816 rows, t_end=10.002)
+CHECK no_nan: PASS (0 NaN in E or Omega)
+CHECK t0_analytic: PASS (E0=0.125 Omega0=0.375 vs analytic 0.125 and 0.375)
+CHECK energy_budget: PASS (-dE/dt within 5% of peak eps on 815/815 steps)
+CHECK timing: median_ms=151.23 p10_ms=150.72 p90_ms=151.79 peak_eps=0.0127469 at t=8.873
+CHECK ref_rows: PASS (reference tgv_dist2_256_32.csv has 816 rows, run has 816)
+CHECK ref_time_axis: PASS (time axes agree)
+CHECK ref_E: PASS (max rel err E 0.00e+00 <= 4e-09)
+CHECK ref_eps: PASS (max rel err eps 7.85e-10 <= 4e-09)
+CHECK ref_peak_time: PASS (run peak 0.0127469 at t=8.873, reference 0.0127469 at t=8.873)
+CHECK 256^3 R=2 tgv_256_2.csv: PASS

@@ -1,0 +1,66 @@
+=== bootstrap start 2026-09-21T10:35:36Z GRID=256 RANKS=32
+env.sh: venv /opt/aws_neuronx_venv_jax_0_10, neuronx-cc /opt/aws_neuronx_venv_jax_0_10/bin/neuronx-cc, nki 0.6.0+31049202112.g85070674
+| NEURON | NEURON |  NEURON  | NEURON |   CONNECTED   |     PCI      |     CPU      | NUMA |
+| DEVICE | CORES  | CORE IDS | MEMORY |    DEVICES    |     BDF      |   AFFINITY   | NODE |
+| 0      | 2      | 0-1      | 32 GB  | 12, 3, 4, 1   | 0000:10:1b.0 | 0-31,64-95   | 0    |
+| 1      | 2      | 2-3      | 32 GB  | 13, 0, 5, 2   | 0000:10:1e.0 | 0-31,64-95   | 0    |
+| 2      | 2      | 4-5      | 32 GB  | 14, 1, 6, 3   | 0000:a0:1b.0 | 32-63,96-127 | 1    |
+| 3      | 2      | 6-7      | 32 GB  | 15, 2, 7, 0   | 0000:a0:1e.0 | 32-63,96-127 | 1    |
+| 4      | 2      | 8-9      | 32 GB  | 0, 7, 8, 5    | 0000:20:1e.0 | 0-31,64-95   | 0    |
+| 5      | 2      | 10-11    | 32 GB  | 1, 4, 9, 6    | 0000:20:1c.0 | 0-31,64-95   | 0    |
+| 6      | 2      | 12-13    | 32 GB  | 2, 5, 10, 7   | 0000:90:1e.0 | 32-63,96-127 | 1    |
+| 7      | 2      | 14-15    | 32 GB  | 3, 6, 11, 4   | 0000:90:1c.0 | 32-63,96-127 | 1    |
+| 8      | 2      | 16-17    | 32 GB  | 4, 11, 12, 9  | 0000:20:1d.0 | 0-31,64-95   | 0    |
+| 9      | 2      | 18-19    | 32 GB  | 5, 8, 13, 10  | 0000:20:1b.0 | 0-31,64-95   | 0    |
+| 10     | 2      | 20-21    | 32 GB  | 6, 9, 14, 11  | 0000:90:1d.0 | 32-63,96-127 | 1    |
+| 11     | 2      | 22-23    | 32 GB  | 7, 10, 15, 8  | 0000:90:1b.0 | 32-63,96-127 | 1    |
+| 12     | 2      | 24-25    | 32 GB  | 8, 15, 0, 13  | 0000:10:1c.0 | 0-31,64-95   | 0    |
+| 13     | 2      | 26-27    | 32 GB  | 9, 12, 1, 14  | 0000:10:1d.0 | 0-31,64-95   | 0    |
+| 14     | 2      | 28-29    | 32 GB  | 10, 13, 2, 15 | 0000:a0:1c.0 | 32-63,96-127 | 1    |
+| 15     | 2      | 30-31    | 32 GB  | 11, 14, 3, 12 | 0000:a0:1d.0 | 32-63,96-127 | 1    |
+make -C driver
+make[1]: Entering directory '/home/ubuntu/neuron-spectral-dns/driver'
+gcc -O2 -Wall -I/opt/aws/neuron/include tgv_run.c -o tgv_run -L/opt/aws/neuron/lib -Wl,-rpath,/opt/aws/neuron/lib -lnrt -lm -pthread
+gcc -O2 -Wall -I/opt/aws/neuron/include tgv_fused.c -o tgv_fused -L/opt/aws/neuron/lib -Wl,-rpath,/opt/aws/neuron/lib -lnrt -lm -pthread
+tgv_fused.c: In function ‘run_rank’:
+tgv_fused.c:58:3: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+   58 |   for(size_t j=0;j<NC;j++) cb[j]=1.0f; ones=filled(spec,"ONES",cb);
+      |   ^~~
+tgv_fused.c:58:40: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+   58 |   for(size_t j=0;j<NC;j++) cb[j]=1.0f; ones=filled(spec,"ONES",cb);
+      |                                        ^~~~
+tgv_fused.c:72:3: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+   72 |   for(int c=0;c<3;c++) add(ini,A3[c],ph[c]); for(int i=0;i<3;i++) add(ini,MAT[i],tm[i]); for(int i=0;i<6;i++) addout(ino,i,st[0][i]);
+      |   ^~~
+tgv_fused.c:72:46: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+   72 |   for(int c=0;c<3;c++) add(ini,A3[c],ph[c]); for(int i=0;i<3;i++) add(ini,MAT[i],tm[i]); for(int i=0;i<6;i++) addout(ino,i,st[0][i]);
+      |                                              ^~~
+tgv_fused.c:74:7: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+   74 |       for(int i=0;i<5;i++) add(si[k][s],RC[i],rc[i]); add(si[k][s],RC[5],s==2?rc[5]:ones); for(int c=0;c<3;c++) add(si[k][s],RK[c],rk[s][c]); }
+      |       ^~~
+tgv_fused.c:74:55: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+   74 |       for(int i=0;i<5;i++) add(si[k][s],RC[i],rc[i]); add(si[k][s],RC[5],s==2?rc[5]:ones); for(int c=0;c<3;c++) add(si[k][s],RK[c],rk[s][c]); }
+      |                                                       ^~~
+make[1]: Leaving directory '/home/ubuntu/neuron-spectral-dns/driver'
+scripts/run.sh 256 32 10
+run.sh: N=256 R=32 steps=815 dt=0.01227184630308513 nu=0.000625 t_end=10 build=/home/ubuntu/neuron-spectral-dns/build/n256_r32
+run.sh: exporting dist_fwd3 and tgv_fused for N=256 R=32 (2026-09-21T10:36:05Z)
+knobs N=256 R=32 WIDE_EL=2048 PLANE_EL=1024 DIRECT=1 ELEM_EL=512 switches rows=1 x=1 copy=1 cross=1 tag=''
+NEFF /home/ubuntu/neuron-spectral-dns/build/n256_r32/dist_fwd3_256_32.neff 308224 83s
+NEFF /home/ubuntu/neuron-spectral-dns/build/n256_r32/tgv_fused_256_32.neff 287744 3s
+TGVFUSED N=256 R=32 steps=815 dt=0.012272 t_end=10.0016 wall_s=30.76 ms_per_step_incl_stats=37.74
+TGVFUSED ALL RANKS OK
+TGVDIST-MERGE rows=816 t_end=10.002 E_end=0.0744012 peak_eps=0.012747 at t=8.873 median_step_ms=29.96
+python3 tools/check.py build/n256_r32/tgv_256_32.csv --grid 256 --ranks 32 | tee build/n256_r32/check.log
+CHECK rows: PASS (816 rows, t_end=10.002)
+CHECK no_nan: PASS (0 NaN in E or Omega)
+CHECK t0_analytic: PASS (E0=0.125 Omega0=0.375 vs analytic 0.125 and 0.375)
+CHECK energy_budget: PASS (-dE/dt within 5% of peak eps on 815/815 steps)
+CHECK timing: median_ms=29.96 p10_ms=28.72 p90_ms=31.85 peak_eps=0.0127469 at t=8.873
+CHECK ref_rows: PASS (reference tgv_dist2_256_32.csv has 816 rows, run has 816)
+CHECK ref_time_axis: PASS (time axes agree)
+CHECK ref_E: PASS (max rel err E 0.00e+00 <= 4e-09)
+CHECK ref_eps: PASS (max rel err eps 0.00e+00 <= 4e-09)
+CHECK ref_peak_time: PASS (run peak 0.0127469 at t=8.873, reference 0.0127469 at t=8.873)
+CHECK 256^3 R=32 tgv_256_32.csv: PASS
+=== bootstrap end 2026-09-21T10:38:22Z exit=0

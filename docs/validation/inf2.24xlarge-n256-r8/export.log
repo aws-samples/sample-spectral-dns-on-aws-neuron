@@ -1,0 +1,3 @@
+knobs N=256 R=8 WIDE_EL=2048 PLANE_EL=1024 DIRECT=1 ELEM_EL=512 switches rows=1 x=1 copy=1 cross=1 tag=''
+NEFF /home/ubuntu/neuron-spectral-dns/build/n256_r8/dist_fwd3_256_8.neff 533504 31s
+NEFF /home/ubuntu/neuron-spectral-dns/build/n256_r8/tgv_fused_256_8.neff 871424 8s

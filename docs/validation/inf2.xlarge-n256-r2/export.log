@@ -1,0 +1,3 @@
+knobs N=256 R=2 WIDE_EL=2048 PLANE_EL=1024 DIRECT=1 ELEM_EL=512 switches rows=1 x=1 copy=1 cross=1 tag=''
+NEFF /home/ubuntu/nsd2/build/n256_r2/dist_fwd3_256_2.neff 1444864 14s
+NEFF /home/ubuntu/nsd2/build/n256_r2/tgv_fused_256_2.neff 3062784 33s

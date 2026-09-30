@@ -1,0 +1,1 @@
+TGVRUN N=64 steps=204 dt=0.04909 t_end=10.014 device_steps_wall_s=1.860 ms_per_step_incl_readback=9.120

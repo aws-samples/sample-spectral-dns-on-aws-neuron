@@ -1,0 +1,3 @@
+knobs N=512 R=32 WIDE_EL=2048 PLANE_EL=1024 DIRECT=1 ELEM_EL=512 switches rows=1 x=1 copy=1 cross=1 tag=''
+NEFF /home/ubuntu/neuron-spectral-dns/build/n512_r32/dist_fwd3_512_32.neff 1455104 9s
+NEFF /home/ubuntu/neuron-spectral-dns/build/n512_r32/tgv_fused_512_32.neff 1864704 16s

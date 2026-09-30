@@ -1,0 +1,2 @@
+TGVFUSED N=256 R=8 steps=815 dt=0.012272 t_end=10.0016 wall_s=87.23 ms_per_step_incl_stats=107.03
+TGVFUSED ALL RANKS OK

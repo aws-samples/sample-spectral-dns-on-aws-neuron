@@ -1,0 +1,55 @@
+=== accept chain start 2026-09-21T11:06:03Z
+env.sh: venv /opt/aws_neuronx_venv_jax_0_10, neuronx-cc /opt/aws_neuronx_venv_jax_0_10/bin/neuronx-cc, nki 0.6.0+31049202112.g85070674
+make -C driver
+make[1]: Entering directory '/home/ubuntu/neuron-spectral-dns/driver'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/home/ubuntu/neuron-spectral-dns/driver'
+scripts/run.sh 128 2 10
+run.sh: N=128 R=2 steps=408 dt=0.02454369260617026 nu=0.000625 t_end=10 build=/home/ubuntu/neuron-spectral-dns/build/n128_r2
+run.sh: exporting dist_fwd3 and tgv_fused for N=128 R=2 (2026-09-21T11:06:03Z)
+knobs N=128 R=2 WIDE_EL=2048 PLANE_EL=1024 DIRECT=1 ELEM_EL=512 switches rows=1 x=1 copy=1 cross=1 tag=''
+NEFF /home/ubuntu/neuron-spectral-dns/build/n128_r2/dist_fwd3_128_2.neff 277504 3s
+NEFF /home/ubuntu/neuron-spectral-dns/build/n128_r2/tgv_fused_128_2.neff 441344 5s
+TGVFUSED N=128 R=2 steps=408 dt=0.024544 t_end=10.0138 wall_s=11.29 ms_per_step_incl_stats=27.68
+TGVFUSED ALL RANKS OK
+TGVDIST-MERGE rows=409 t_end=10.014 E_end=0.0711107 peak_eps=0.013455 at t=8.860 median_step_ms=16.87
+python3 tools/check.py build/n128_r2/tgv_128_2.csv --grid 128 --ranks 2 | tee build/n128_r2/check.log
+CHECK rows: PASS (409 rows, t_end=10.014)
+CHECK no_nan: PASS (0 NaN in E or Omega)
+CHECK t0_analytic: PASS (E0=0.125 Omega0=0.375 vs analytic 0.125 and 0.375)
+CHECK energy_budget: PASS (-dE/dt within 5% of peak eps on 408/408 steps)
+CHECK timing: median_ms=16.85 p10_ms=14.24 p90_ms=24.16 peak_eps=0.0134552 at t=8.860
+CHECK ref_rows: PASS (reference tgv_dist2_128_32.csv has 409 rows, run has 409)
+CHECK ref_time_axis: PASS (time axes agree)
+CHECK ref_E: PASS (max rel err E 0.00e+00 <= 4e-09)
+CHECK ref_eps: PASS (max rel err eps 0.00e+00 <= 4e-09)
+CHECK ref_peak_time: PASS (run peak 0.0134552 at t=8.860, reference 0.0134552 at t=8.860)
+CHECK 128^3 R=2 tgv_128_2.csv: PASS
+make -C driver
+make[1]: Entering directory '/home/ubuntu/neuron-spectral-dns/driver'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/home/ubuntu/neuron-spectral-dns/driver'
+scripts/run.sh 256 2 10
+run.sh: N=256 R=2 steps=815 dt=0.01227184630308513 nu=0.000625 t_end=10 build=/home/ubuntu/neuron-spectral-dns/build/n256_r2
+run.sh: exporting dist_fwd3 and tgv_fused for N=256 R=2 (2026-09-21T11:06:32Z)
+knobs N=256 R=2 WIDE_EL=2048 PLANE_EL=1024 DIRECT=1 ELEM_EL=512 switches rows=1 x=1 copy=1 cross=1 tag=''
+NEFF /home/ubuntu/neuron-spectral-dns/build/n256_r2/dist_fwd3_256_2.neff 1444864 15s
+NEFF /home/ubuntu/neuron-spectral-dns/build/n256_r2/tgv_fused_256_2.neff 3062784 35s
+TGVFUSED N=256 R=2 steps=815 dt=0.012272 t_end=10.0016 wall_s=181.11 ms_per_step_incl_stats=222.22
+TGVFUSED ALL RANKS OK
+TGVDIST-MERGE rows=816 t_end=10.002 E_end=0.0744012 peak_eps=0.012747 at t=8.873 median_step_ms=150.29
+python3 tools/check.py build/n256_r2/tgv_256_2.csv --grid 256 --ranks 2 | tee build/n256_r2/check.log
+CHECK rows: PASS (816 rows, t_end=10.002)
+CHECK no_nan: PASS (0 NaN in E or Omega)
+CHECK t0_analytic: PASS (E0=0.125 Omega0=0.375 vs analytic 0.125 and 0.375)
+CHECK energy_budget: PASS (-dE/dt within 5% of peak eps on 815/815 steps)
+CHECK timing: median_ms=150.29 p10_ms=149.72 p90_ms=150.85 peak_eps=0.0127469 at t=8.873
+CHECK ref_rows: PASS (reference tgv_dist2_256_32.csv has 816 rows, run has 816)
+CHECK ref_time_axis: PASS (time axes agree)
+CHECK ref_E: PASS (max rel err E 0.00e+00 <= 4e-09)
+CHECK ref_eps: PASS (max rel err eps 7.85e-10 <= 4e-09)
+CHECK ref_peak_time: PASS (run peak 0.0127469 at t=8.873, reference 0.0127469 at t=8.873)
+CHECK 256^3 R=2 tgv_256_2.csv: PASS
+exit=0
+=== accept chain end 2026-09-21T11:10:33Z
+2026-09-21 11:04:23

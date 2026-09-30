@@ -1,0 +1,11 @@
+CHECK rows: PASS (409 rows, t_end=10.014)
+CHECK no_nan: PASS (0 NaN in E or Omega)
+CHECK t0_analytic: PASS (E0=0.125 Omega0=0.374999989 vs analytic 0.125 and 0.375)
+CHECK energy_budget: PASS (-dE/dt within 5% of peak eps on 408/408 steps)
+CHECK timing: median_ms=21.43 p10_ms=21.07 p90_ms=42.02 peak_eps=0.0134553 at t=8.860
+CHECK ref_rows: PASS (reference oracle_128.csv has 409 rows, run has 409)
+CHECK ref_time_axis: PASS (time axes agree)
+CHECK ref_E: PASS (max rel err E 2.74e-07 <= 1e-06)
+CHECK ref_eps: PASS (max rel err eps 6.99e-07 <= 1e-06)
+CHECK ref_peak_time: PASS (run peak 0.0134553 at t=8.860, reference 0.0134553 at t=8.860)
+CHECK 128^3 R=1 tgv_128_1.csv: PASS

@@ -1,0 +1,8 @@
+build/
+__pycache__/
+*.pyc
+*.neff
+*.bin
+art-*/
+.pcsr/.threatmodel/
+.DS_Store

@@ -1,0 +1,185 @@
+{
+ "iso": 6.452238225936888,
+ "iso_percentile": 90.0,
+ "iso_frame_t": 8.9462,
+ "iso2": 1.5,
+ "speed_range": [
+  0.0,
+  1.3952362537384033
+ ],
+ "resolution": [
+  1280,
+  720
+ ],
+ "frames": [
+  {
+   "index": 0,
+   "t": 0.0,
+   "png": "frame_0000.png",
+   "triangles": 0,
+   "seconds": 2.61,
+   "triangles_iso2": 1083552
+  },
+  {
+   "index": 1,
+   "t": 0.497,
+   "png": "frame_0001.png",
+   "triangles": 0,
+   "seconds": 14.78,
+   "triangles_iso2": 993056
+  },
+  {
+   "index": 2,
+   "t": 0.994,
+   "png": "frame_0002.png",
+   "triangles": 0,
+   "seconds": 13.72,
+   "triangles_iso2": 465704
+  },
+  {
+   "index": 3,
+   "t": 1.491,
+   "png": "frame_0003.png",
+   "triangles": 0,
+   "seconds": 12.41,
+   "triangles_iso2": 0
+  },
+  {
+   "index": 4,
+   "t": 1.988,
+   "png": "frame_0004.png",
+   "triangles": 0,
+   "seconds": 24.87,
+   "triangles_iso2": 3228696
+  },
+  {
+   "index": 5,
+   "t": 2.485,
+   "png": "frame_0005.png",
+   "triangles": 0,
+   "seconds": 33.97,
+   "triangles_iso2": 5701812
+  },
+  {
+   "index": 6,
+   "t": 2.9821,
+   "png": "frame_0006.png",
+   "triangles": 0,
+   "seconds": 40.57,
+   "triangles_iso2": 7518912
+  },
+  {
+   "index": 7,
+   "t": 3.4791,
+   "png": "frame_0007.png",
+   "triangles": 0,
+   "seconds": 48.77,
+   "triangles_iso2": 9811656
+  },
+  {
+   "index": 8,
+   "t": 3.9761,
+   "png": "frame_0008.png",
+   "triangles": 1484224,
+   "seconds": 55.63,
+   "triangles_iso2": 11358628
+  },
+  {
+   "index": 9,
+   "t": 4.4731,
+   "png": "frame_0009.png",
+   "triangles": 2643840,
+   "seconds": 55.3,
+   "triangles_iso2": 10957824
+  },
+  {
+   "index": 10,
+   "t": 4.9701,
+   "png": "frame_0010.png",
+   "triangles": 3658816,
+   "seconds": 58.47,
+   "triangles_iso2": 11515442
+  },
+  {
+   "index": 11,
+   "t": 5.4671,
+   "png": "frame_0011.png",
+   "triangles": 4583744,
+   "seconds": 69.61,
+   "triangles_iso2": 14448312
+  },
+  {
+   "index": 12,
+   "t": 5.9641,
+   "png": "frame_0012.png",
+   "triangles": 4952736,
+   "seconds": 82.11,
+   "triangles_iso2": 17804668
+  },
+  {
+   "index": 13,
+   "t": 6.4611,
+   "png": "frame_0013.png",
+   "triangles": 7053968,
+   "seconds": 97.35,
+   "triangles_iso2": 21125072
+  },
+  {
+   "index": 14,
+   "t": 6.9581,
+   "png": "frame_0014.png",
+   "triangles": 9166964,
+   "seconds": 108.93,
+   "triangles_iso2": 23330748
+  },
+  {
+   "index": 15,
+   "t": 7.4551,
+   "png": "frame_0015.png",
+   "triangles": 10566552,
+   "seconds": 118.75,
+   "triangles_iso2": 25534860
+  },
+  {
+   "index": 16,
+   "t": 7.9522,
+   "png": "frame_0016.png",
+   "triangles": 12941328,
+   "seconds": 128.27,
+   "triangles_iso2": 27877056
+  },
+  {
+   "index": 17,
+   "t": 8.4492,
+   "png": "frame_0017.png",
+   "triangles": 14367588,
+   "seconds": 137.21,
+   "triangles_iso2": 29322940
+  },
+  {
+   "index": 18,
+   "t": 8.9462,
+   "png": "frame_0018.png",
+   "triangles": 17001256,
+   "seconds": 141.48,
+   "triangles_iso2": 30610200
+  },
+  {
+   "index": 19,
+   "t": 9.4432,
+   "png": "frame_0019.png",
+   "triangles": 18181792,
+   "seconds": 149.21,
+   "triangles_iso2": 31641088
+  },
+  {
+   "index": 20,
+   "t": 9.9402,
+   "png": "frame_0020.png",
+   "triangles": 17857496,
+   "seconds": 145.94,
+   "triangles_iso2": 31595768
+  }
+ ],
+ "total_seconds": 1540.0
+}
